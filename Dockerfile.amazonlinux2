@@ -1,0 +1,29 @@
+FROM amazonlinux:2
+
+ARG GO_VERSION=1.20.1
+
+# Install required software
+RUN yum groupinstall -y "Development Tools" && yum install shadow-utils
+
+RUN useradd -m -G users,wheel -d /build -s /bin/bash build
+
+WORKDIR /tmp
+RUN curl -LOs https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && rm -rf /usr/local/go && tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && rm -f go${GO_VERSION}.linux-amd64.tar.gz
+
+USER build
+
+RUN echo "%_topdir       /build/rpm" >> /build/.rpmmacros && \
+    echo "%_builddir     %{_topdir}" >> /build/.rpmmacros && \
+    echo "%_rpmdir       %{_topdir}/RPMS" >> /build/.rpmmacros && \
+    echo "%_sourcedir    %{_topdir}" >> /build/.rpmmacros && \
+    echo "%_specdir      %{_topdir}" >> /build/.rpmmacros && \
+    echo "%_srcrpmdir    %{_topdir}/SRPMS" >> /build/.rpmmacros && \
+    echo "%_buildrootdir %{_tmppath}/BUILDROOT" >> /build/.rpmmacros
+
+ENV GOPATH=/build/go
+ENV PATH="/usr/local/go/bin:$GOPATH/bin:$PATH"
+
+WORKDIR /build/rpm
+
+ENTRYPOINT ["rpmbuild"]
+
