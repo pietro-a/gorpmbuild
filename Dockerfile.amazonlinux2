@@ -3,7 +3,7 @@ FROM amazonlinux:2
 ARG GO_VERSION=1.20.1
 
 # Install required software
-RUN yum groupinstall -y "Development Tools" && yum install -y shadow-utils
+RUN yum groupinstall -y "Development Tools" && yum install -y shadow-utils which
 
 RUN useradd -m -G users,wheel -d /build -s /bin/bash build
 
